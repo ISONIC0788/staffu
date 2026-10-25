@@ -1,0 +1,350 @@
+TASK 1: 10
+R1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#access-list 100 permit tcp 172.22.34.64 0.0.0.31 host 172.22.34.62  eq ftp 
+R1(config)#interface gigabitEthernet 0/0
+R1(config-if)#ip access-group 100 in
+R1(config-if)#do wr
+Building configuration...
+[OK]
+R1(config-if)#
+R1(config-if)#ex
+R1(config)#ip access-list extended HTTP_ONLY
+R1(config-ext-nacl)#PERmit tcp 172.22.34.96 0.0.0.15 host 172.22.34.62 eq www
+R1(config-ext-nacl)#permit icmp 172.22.34.96 0.0.0.15 host 172.22.34.62
+R1(config-ext-nacl)#ex
+R1(config)#interface gigabitEthernet 0/1
+R1(config-if)#ip ac
+R1(config-if)#ip access-group HTTP_ONLY IN
+
+
+TASK 2: 11
+
+
+RTA#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+RTA(config)#
+RTA(config)#access-list 199 permit tcp 10.101.117.32 0.0.0.15  10.101.117.0 0.0.0.31 eq 22
+RTA(config)#access-list 199 permit any ?
+% Unrecognized command
+RTA(config)#access-list 199 permit ?
+  ahp    Authentication Header Protocol
+  eigrp  Cisco's EIGRP routing protocol
+  esp    Encapsulation Security Payload
+  gre    Cisco's GRE tunneling
+  icmp   Internet Control Message Protocol
+  ip     Any Internet Protocol
+  ospf   OSPF routing protocol
+  tcp    Transmission Control Protocol
+  udp    User Datagram Protocol
+RTA(config)#access-list 199 ?
+  deny    Specify packets to reject
+  permit  Specify packets to forward
+  remark  Access list entry comment
+RTA(config)#access-list 199 per
+RTA(config)#access-list 199 permit ?
+  ahp    Authentication Header Protocol
+  eigrp  Cisco's EIGRP routing protocol
+  esp    Encapsulation Security Payload
+  gre    Cisco's GRE tunneling
+  icmp   Internet Control Message Protocol
+  ip     Any Internet Protocol
+  ospf   OSPF routing protocol
+  tcp    Transmission Control Protocol
+  udp    User Datagram Protocol
+RTA(config)#access-list 199 permit ic
+RTA(config)#access-list 199 permit icmp ?
+  A.B.C.D  Source address
+  any      Any source host
+  host     A single source host
+RTA(config)#access-list 199 permit icmp any ?
+  A.B.C.D  Destination address
+  any      Any destination host
+  host     A single destination host
+RTA(config)#access-list 199 permit icmp any any
+RTA(config)#access-list 199 permit icmp any any 
+RTA(config)#interface gigabitEthernet 0/2
+RTA(config-if)#ip access-group 199 out
+RTA(config-if)#do wr
+Building configuration...
+[OK]
+RTA(config-if)#
+
+TASK 3: 2.5
+----------
+"R3(config)# access-list 100 permit tcp 10.0.0.0 0.255.255.255 eq 22 host 
+192.168.3.3 
+R3(config)# access-list 100 deny ip 10.0.0.0 0.255.255.255 any
+R3(config)# access-list 100 deny ip 172.16.0.0 0.15.255.255 any
+R3(config)# access-list 100 deny ip 192.168.0.0 0.0.255.255 any
+R3(config)# access-list 100 deny ip 127.0.0.0 0.255.255.255 any
+R3(config)# access-list 100 deny ip 224.0.0.0 15.255.255.255 any
+R3(config)# access-list 100 permit ip any any"
+
+
+R1>en
+Password: 
+R1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#access-list 10 permit 192.168.3.3
+R1(config)#do wr
+Building configuration...
+[OK]
+R1(config)#
+R1(config)#line vty 0 4
+R1(config-line)#access-class 10 in
+R1(config-line)#do wr
+Building configuration...
+[OK]
+R1(config-line)#exit
+R1(config)#access-list 120 permit udp any host 192.168.1.3 eq dom
+R1(config)#access-list 120 permit udp any host 192.168.1.3 eq domain 
+R1(config)#access-list 120 permit tcp any host 192.168.1.3 eq ?
+  <0-65535>  Port number
+  ftp        File Transfer Protocol (21)
+  pop3       Post Office Protocol v3 (110)
+  smtp       Simple Mail Transport Protocol (25)
+  telnet     Telnet (23)
+  www        World Wide Web (HTTP, 80)
+R1(config)#access-list 120 permit tcp any host 192.168.1.3 eq smtp
+R1(config)#access-list 120 permit tcp any host 192.168.1.3 eq ftp
+R1(config)#do wr
+Building configuration...
+[OK]
+R1(config)#access-list 120 deny tcp any host 192.168.1.3 eq ?
+  <0-65535>  Port number
+  ftp        File Transfer Protocol (21)
+  pop3       Post Office Protocol v3 (110)
+  smtp       Simple Mail Transport Protocol (25)
+  telnet     Telnet (23)
+  www        World Wide Web (HTTP, 80)
+R1(config)#access-list 120 deny tcp any host 192.168.1.3 eq 443
+R1(config)#access-list 120 permit tcp host 192.168.3.3 ?
+  A.B.C.D  Destination address
+  any      Any destination host
+  eq       Match only packets on a given port number
+  gt       Match only packets with a greater port number
+  host     A single destination host
+  lt       Match only packets with a lower port number
+  neq      Match only packets not on a given port number
+  range    Match only packets in the range of port numbers
+R1(config)#access-list 120 permit tcp host 192.168.3.3 host 10.1.1.1 eq 22
+R1(config)#interface serial 0/0/0
+R1(config-if)#ip access-group 120 in
+R1(config-if)#acc
+R1(config-if)#acce
+R1(config-if)#ex
+R1(config)#ac
+R1(config)#access-list 120 ?
+  deny    Specify packets to reject
+  permit  Specify packets to forward
+  remark  Access list entry comment
+R1(config)#access-list 120 permit icmp ?
+  A.B.C.D  Source address
+  any      Any source host
+  host     A single source host
+R1(config)#access-list 120 permit icmp any
+R1(config)#access-list 120 permit icmp any any
+R1(config)#access-list 120 permit icmp any any ?
+  <0-256>               type-num
+  echo                  Echo (ping)
+  echo-reply            Echo reply
+  host-unreachable      Host unreachable
+  net-unreachable       Net unreachable
+  port-unreachable      Port unreachable
+  protocol-unreachable  Protocol unreachable
+  ttl-exceeded          TTL exceeded
+  unreachable           All unreachables
+  <cr>
+R1(config)#access-list 120 permit icmp any any ach
+R1(config)#access-list 120 permit icmp any any acho
+R1(config)#access-list 120 permit icmp any any acho-
+R1(config)#access-list 120 permit icmp any any ech
+R1(config)#access-list 120 permit icmp any any echo
+R1(config)#access-list 120 permit icmp any any echo-
+R1(config)#access-list 120 permit icmp any any echo-reply 
+R1(config)#access-list 120 permit icmp any any unr
+R1(config)#access-list 120 permit icmp any any unreachable 
+R1(config)#access-list 120 permit icmp any any
+R1(config)#access-list 120 deny icmp any any
+R1(config)#no access-list 120 permit icmp any any
+R1(config)#acc
+R1(config)#access-list 120 per
+R1(config)#access-list 120 permit i
+R1(config)#access-list 120 permit ip
+R1(config)#access-list 120 permit ip a
+R1(config)#access-list 120 permit ip any an
+R1(config)#access-list 120 permit ip any any 
+R1(config)#do wr
+Building configuration...
+[OK]
+R1(config)#acc
+R1(config)#
+
+
+Password: 
+
+R2>en
+Password: 
+R2#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R2(config)#acc
+R2(config)#access-list 10 per
+R2(config)#access-list 10 permit 192.168.3.3
+R2(config)#do wr
+Building configuration...
+[OK]
+R2(config)#
+R2(config)#line v
+R2(config)#line vty 0 4
+R2(config-line)#acc
+R2(config-line)#acce
+R2(config-line)#access-class 10 in 
+R2(config-line)#do wr
+Building configuration...
+[OK]
+R2(config-line)#
+
+R3>en
+Password: 
+R3#conf 6
+        ^
+% Invalid input detected at '^' marker.
+	
+R3#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R3(config)#acc
+R3(config)#access-list 10 perm
+R3(config)#access-list 10 permit 192.168.3.3
+R3(config)#do wr
+Building configuration...
+[OK]
+R3(config)#lin
+R3(config)#line v
+R3(config)#line vty 0 4
+R3(config-line)#acc
+R3(config-line)#ip a
+R3(config-line)#ip access-class ?
+  WORD  Access-list name
+R3(config-line)#?
+Virtual Line configuration commands:
+  access-class   Filter connections based on an IP access list
+  accounting     Accounting parameters
+  databits       Set number of data bits per character
+  exec-timeout   Set the EXEC timeout
+  exit           Exit from line configuration mode
+  flowcontrol    Set the flow control
+  history        Enable and control the command history function
+  ipv6           IPv6 options
+  logging        Modify message logging facilities
+  login          Enable password checking
+  motd-banner    Enable the display of the MOTD banner
+  no             Negate a command or set its defaults
+  parity         Set terminal parity
+  password       Set a password
+  privilege      Change privilege level for line
+  session-limit  Set maximum number of sessions
+  speed          Set the transmit and receive speeds
+  stopbits       Set async line stop bits
+  transport      Define transport protocols for line
+R3(config-line)#ac
+R3(config-line)#acc
+R3(config-line)#acce
+R3(config-line)#access-class ?
+  <1-199>  IP access list
+  WORD     Access-list name
+R3(config-line)#access-class 10 ?
+  in   Filter incoming connections
+  out  Filter outgoing connections
+R3(config-line)#access-class 10 in
+R3(config-line)#do wr
+Building configuration...
+[OK]
+R3(config-line)#
+R3(config-line)#ex
+% Ambiguous command: "ex"
+R3(config-line)#exit
+R3(config)#
+
+
+
+
+
+
+
+
+R3 con0 is now available
+
+
+
+
+
+
+Press RETURN to get started.
+
+
+
+
+
+
+
+
+
+
+
+
+
+User Access Verification
+
+Password: 
+Password: 
+
+R3>en
+Password: 
+R3#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R3(config)#ac
+R3(config)#access-list 110 ?
+  deny    Specify packets to reject
+  permit  Specify packets to forward
+  remark  Access list entry comment
+R3(config)#access-list 110 192.168.3.0 0.0.0.255 any
+                           ^
+% Invalid input detected at '^' marker.
+	
+R3(config)#access-list 110 ip 192.168.3.0 0.0.0.255 any
+                           ^
+% Invalid input detected at '^' marker.
+	
+R3(config)#access-list 110 permit ip 192.168.3.0 0.0.0.255 any
+R3(config)#int
+R3(config)#interface g
+R3(config)#interface gigabitEthernet 0/1
+R3(config-if)#ip ac
+R3(config-if)#ip access-group 110 in
+R3(config-if)#do wr
+Building configuration...
+[OK]
+R3(config-if)#ex
+R3(config)#acc
+R3(config)#access-list 100 permit tcp 10.0.0.0 0.255.255.255 eq 22 host
+% Incomplete command.
+R3(config)#access-list 100 permit tcp 10.0.0.0 0.255.255.255 eq 22 host ?
+  A.B.C.D  Destination address
+R3(config)#access-list 100 permit tcp 10.0.0.0 0.255.255.255 eq 22 host 192.168.3.3 
+R3(config)# access-list 100 deny ip 10.0.0.0 0.255.255.255 any
+R3(config)# access-list 100 deny ip 172.16.0.0 0.15.255.255 any
+R3(config)# access-list 100 deny ip 192.168.0.0 0.0.255.255 any
+R3(config)# access-list 100 deny ip 127.0.0.0 0.255.255.255 any
+R3(config)#access-list 100 deny ip 224.0.0.0 15.255.255.255 any
+R3(config)#access-list 100 permit ip any any
+R3(config)#in
+R3(config)#interface s
+R3(config)#interface serial 0/0/1
+R3(config-if)#ip
+R3(config-if)#ip ac
+R3(config-if)#ip access-group 100 in
+R3(config-if)#do wr
+Building configuration...
+[OK]
+R3(config-if)#

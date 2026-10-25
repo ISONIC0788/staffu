@@ -1,0 +1,304 @@
+================================================================================
+ITLNS701 PRACTICAL CAT REFERENCE CHEAT SHEET
+Modules: LU5 (AAA), LU6 (ASA 5505 Firewall), LU7 (Site-to-Site IPsec VPN)
+================================================================================
+
+--------------------------------------------------------------------------------
+PART 1: LU5 — SERVER-BASED & LOCAL AAA
+--------------------------------------------------------------------------------
+
+1. R1: LOCAL AAA CONFIGURATION
+------------------------------
+enable
+configure terminal
+hostname R1
+banner motd # UNAUTHORIZED ACCESS PROHIBITED #
+username admin privilege 15 secret Cisco123
+interface gigabitEthernet 0/0
+ ip address 192.168.1.1 255.255.255.0
+ no shutdown
+ exit
+aaa new-model
+aaa authentication login default local
+line con 0
+ login authentication default
+ exit
+line vty 0 4
+ login authentication default
+ exit
+end
+write memory
+
+2. AAA SERVER SETUP (Packet Tracer Server-PT GUI)
+-------------------------------------------------
+- Desktop -> IP Configuration:
+    IP Address:      192.168.1.10
+    Subnet Mask:     255.255.255.0
+    Default Gateway: 192.168.1.1
+- Services -> AAA:
+    Service: On
+    * Add TACACS+ Client:
+        Client Name: R2
+        Client IP:   192.168.1.2
+        Secret:      tacacskey
+        Server Type: TACACS+
+        -> Click Add
+    * Add RADIUS Client:
+        Client Name: R3
+        Client IP:   192.168.1.3
+        Secret:      radiuskey
+        Server Type: RADIUS
+        -> Click Add
+    * Add Users:
+        User 1: Username: tacuser  | Password: tac123  -> Click Add
+        User 2: Username: raduser  | Password: rad123  -> Click Add
+
+3. R2: TACACS+ AAA CONFIGURATION
+--------------------------------
+enable
+configure terminal
+hostname R2
+banner motd # UNAUTHORIZED ACCESS PROHIBITED #
+username localadmin privilege 15 secret LocalPass123
+interface gigabitEthernet 0/0
+ ip address 192.168.1.2 255.255.255.0
+ no shutdown
+ exit
+aaa new-model
+tacacs-server host 192.168.1.10 key tacacskey
+aaa authentication login default group tacacs+ local
+line con 0
+ login authentication default
+ exit
+line vty 0 4
+ login authentication default
+ exit
+end
+write memory
+
+4. R3: RADIUS AAA CONFIGURATION
+-------------------------------
+enable
+configure terminal
+hostname R3
+banner motd # UNAUTHORIZED ACCESS PROHIBITED #
+username localadmin privilege 15 secret LocalPass123
+interface gigabitEthernet 0/0
+ ip address 192.168.1.3 255.255.255.0
+ no shutdown
+ exit
+aaa new-model
+radius-server host 192.168.1.10 auth-port 1645 key radiuskey
+aaa authentication login default group radius local
+line con 0
+ login authentication default
+ exit
+line vty 0 4
+ login authentication default
+ exit
+end
+write memory
+
+5. LU5 VERIFICATION COMMANDS
+----------------------------
+show running-config | section aaa
+show ip interface brief
+debug tacacs authentication
+debug radius
+undebug all
+
+
+--------------------------------------------------------------------------------
+PART 2: LU6 — CISCO ASA 5505 FIREWALL
+--------------------------------------------------------------------------------
+
+1. FACTORY RESET & INITIAL ACCESS
+---------------------------------
+enable
+(Press Enter if prompted for password)
+configure terminal
+hostname ASA5505
+
+2. INTERFACE & VLAN ASSIGNMENT (ASA 5505 Switchports)
+----------------------------------------------------
+! Inside VLAN (Security level 100)
+interface vlan 1
+ nameif inside
+ security-level 100
+ ip address 192.168.10.1 255.255.255.0
+ no shutdown
+ exit
+
+! Outside VLAN (Security level 0)
+interface vlan 2
+ nameif outside
+ security-level 0
+ ip address 209.165.200.226 255.255.255.224
+ no shutdown
+ exit
+
+! Assign Physical Ethernet Ports
+interface Ethernet 0/0
+ switchport access vlan 2
+ no shutdown
+ exit
+
+interface Ethernet 0/1
+ switchport access vlan 1
+ no shutdown
+ exit
+
+3. DEFAULT ROUTE
+----------------
+! route <interface> <destination-ip> <mask> <gateway-ip>
+route outside 0.0.0.0 0.0.0.0 209.165.200.225
+
+4. DHCP & DNS CONFIGURATION FOR INSIDE HOSTS
+--------------------------------------------
+dhcpd address 192.168.10.100-192.168.10.200 inside
+dhcpd dns 8.8.8.8
+dhcpd enable inside
+
+5. OBJECT NETWORK DYNAMIC NAT (PAT / Inside to Outside)
+-------------------------------------------------------
+object network INSIDE_POOL
+ subnet 192.168.10.0 255.255.255.0
+ nat (inside,outside) dynamic interface
+ exit
+
+6. REMOTE MANAGEMENT (SSH SETUP)
+--------------------------------
+domain-name polytechnic.local
+crypto key generate rsa modulus 1024
+username admin password AdminPassword123 privilege 15
+aaa authentication ssh console LOCAL
+ssh 192.168.10.0 255.255.255.0 inside
+ssh timeout 10
+
+7. ACCESS CONTROL LIST (ALLOW OUTSIDE TO PING OR ACCESS)
+--------------------------------------------------------
+! Allow ICMP (ping) from outside through the firewall
+access-list OUTSIDE_TO_INSIDE extended permit icmp any any echo
+access-list OUTSIDE_TO_INSIDE extended permit icmp any any echo-reply
+access-group OUTSIDE_TO_INSIDE in interface outside
+
+8. LU6 VERIFICATION COMMANDS
+----------------------------
+show interface ip brief
+show nameif
+show route
+show xlate
+show nat
+show access-list
+
+
+--------------------------------------------------------------------------------
+PART 3: LU7 — SITE-TO-SITE IPSEC VPN BETWEEN CISCO ROUTERS
+----------------------------------------------------------
+
+Topology:
+Router A (HQ): LAN 192.168.10.0/24, WAN IP 209.165.100.1/30
+Router B (Branch): LAN 192.168.20.0/24, WAN IP 209.165.100.2/30
+
+1. ROUTER A (HQ ROUTER)
+-----------------------
+enable
+configure terminal
+hostname HQ-Router
+
+! 1. Identify Interesting Traffic (ACL)
+access-list 110 permit ip 192.168.10.0 0.0.0.255 192.168.20.0 0.0.0.255
+
+! 2. ISAKMP (Phase 1) Policy
+crypto isakmp policy 10
+ encr aes
+ hash sha
+ authentication pre-share
+ group 2
+ lifetime 86400
+ exit
+
+! 3. Pre-Shared Key
+crypto isakmp key VpnSecretKey2026 address 209.165.100.2
+
+! 4. IPsec Transform Set (Phase 2)
+crypto ipsec transform-set TS-AES-SHA esp-aes esp-sha-hmac
+ exit
+
+! 5. Crypto Map (Binding Phase 1, Phase 2, Peer, and ACL)
+crypto map CMAP 10 ipsec-isakmp
+ set peer 209.165.100.2
+ set transform-set TS-AES-SHA
+ match address 110
+ exit
+
+! 6. Apply Crypto Map to Outgoing WAN Interface
+interface GigabitEthernet0/1
+ ip address 209.165.100.1 255.255.255.252
+ crypto map CMAP
+ no shutdown
+ exit
+
+! Routing back to remote LAN
+ip route 192.168.20.0 255.255.255.0 209.165.100.2
+end
+write memory
+
+2. ROUTER B (BRANCH ROUTER)
+---------------------------
+enable
+configure terminal
+hostname Branch-Router
+
+! 1. Identify Interesting Traffic (ACL - Mirror of HQ)
+access-list 110 permit ip 192.168.20.0 0.0.0.255 192.168.10.0 0.0.0.255
+
+! 2. ISAKMP (Phase 1) Policy (Must match HQ exactly)
+crypto isakmp policy 10
+ encr aes
+ hash sha
+ authentication pre-share
+ group 2
+ lifetime 86400
+ exit
+
+! 3. Pre-Shared Key
+crypto isakmp key VpnSecretKey2026 address 209.165.100.1
+
+! 4. IPsec Transform Set (Phase 2)
+crypto ipsec transform-set TS-AES-SHA esp-aes esp-sha-hmac
+ exit
+
+! 5. Crypto Map
+crypto map CMAP 10 ipsec-isakmp
+ set peer 209.165.100.1
+ set transform-set TS-AES-SHA
+ match address 110
+ exit
+
+! 6. Apply Crypto Map to Outgoing WAN Interface
+interface GigabitEthernet0/1
+ ip address 209.165.100.2 255.255.255.252
+ crypto map CMAP
+ no shutdown
+ exit
+
+! Routing back to remote LAN
+ip route 192.168.10.0 255.255.255.0 209.165.100.1
+end
+write memory
+
+3. LU7 VERIFICATION COMMANDS
+----------------------------
+! Must send traffic (ping from PC to PC) first to bring the tunnel up:
+ping 192.168.20.10
+
+! Check Phase 1 (State must say QM_IDLE):
+show crypto isakmp sa
+
+! Check Phase 2 (Look for packets encrypted / decrypted increments):
+show crypto ipsec sa
+
+! Show maps and engine:
+show crypto map
+show crypto engine connection active

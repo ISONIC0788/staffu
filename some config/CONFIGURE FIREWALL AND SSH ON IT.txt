@@ -1,0 +1,56 @@
+CONFIGURE FIREWALL AND SSH ON IT
+
+interface Ethernet0/0
+!
+interface Ethernet0/1
+ switchport access vlan 2
+!
+interface Vlan1
+ nameif inside
+ security-level 100
+ ip address 10.1.1.1 255.0.0.0
+!
+interface Vlan2
+ nameif outside
+ security-level 0
+ ip address 50.1.1.2 255.0.0.0
+!
+object network LAN
+ subnet 10.0.0.0 255.0.0.0
+ nat (inside,outside) dynamic interface
+!
+route outside 0.0.0.0 0.0.0.0 50.1.1.1 1
+!
+aaa authentication ssh console LOCAL
+!
+username admin password Ne88Ah9pALg7rn0g encrypted
+!
+telnet timeout 5
+ssh 10.1.1.0 255.255.255.0 inside
+ssh timeout 15
+!
+dhcpd address 10.1.1.10-10.1.1.30 inside
+dhcpd dns 8.8.8.8 interface inside
+dhcpd enable inside
+
+ciscoasa#
+
+//TO CONFIGURE SSH ON FIREWALL
+ciscoasa(config)# crypto key generate rsa modulus 2048
+
+ciscoasa(config)# ssh 10.1.1.50 255.255.255.255 inside  or 
+ciscoasa(config)# ssh 10.1.1.0 255.255.255.0 inside
+
+ciscoasa(config)# ssh timeout 15
+ciscoasa(config)# ssh version 2
+
+! 1. Tell the ASA to look at local users for SSH login
+ciscoasa(config)# aaa authentication ssh console LOCAL
+
+! 2. Create your admin account (change 'admin' and 'YourStrongPassword')
+ciscoasa(config)# username admin password YourStrongPassword privilege 15
+
+! 3. Exit and save to NVRAM
+ciscoasa(config)# exit
+ciscoasa# write memory
+

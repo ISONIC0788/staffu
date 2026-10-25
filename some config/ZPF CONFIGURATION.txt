@@ -1,0 +1,201 @@
+Importers, exporters, distributors and users are responsible for
+compliance with U.S. and local country laws. By using this product you
+agree to comply with applicable laws and regulations. If you are unable
+to comply with U.S. and local laws, return this product immediately.
+
+A summary of U.S. laws governing Cisco cryptographic products may be found at:
+http://www.cisco.com/wwl/export/crypto/tool/stqrg.html
+
+If you require further assistance please contact us by sending email to
+export@cisco.com.
+Cisco CISCO1941/K9 (revision 1.0) with 491520K/32768K bytes of memory.
+Processor board ID FTX152400KS
+2 Gigabit Ethernet interfaces
+2 Low-speed serial(sync/async) network interface(s)
+DRAM configuration is 64 bits wide with parity disabled.
+255K bytes of non-volatile configuration memory.
+249856K bytes of ATA System CompactFlash 0 (Read/Write)
+
+License Info:
+
+License UDI:
+
+-------------------------------------------------
+Device#   PID                   SN
+-------------------------------------------------
+*0        CISCO1941/K9          FTX152446W3
+
+
+Technology Package License Information for Module:'c1900'
+
+----------------------------------------------------------------
+Technology    Technology-package          Technology-package
+              Current       Type          Next reboot
+-----------------------------------------------------------------
+ipbase        ipbasek9      Permanent     ipbasek9
+security      securityk9    Evaluation    securityk9
+data          disable       None          None
+
+Configuration register is 0x2102
+
+
+R3# 
+R3#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R3(config)#zon
+R3(config)#zon
+R3(config)#zone sec
+R3(config)#zone security ?
+  WORD  Name of security zone
+R3(config)#zone security IN-ZONE
+R3(config-sec-zone)#EX
+R3(config)#
+R3(config)#zone SE
+R3(config)#zone SEcurity OUT-ZONE
+R3(config-sec-zone)#ex
+R3(config)#
+R3(config)#acc
+R3(config)#access-list 101 per
+R3(config)#access-list 101 permit ip 192.168.3.0 0.0.0.255 any
+R3(config)#cla
+R3(config)#class-map ty
+R3(config)#class-map type in
+R3(config)#class-map type inspect mat
+R3(config)#class-map type inspect matc
+R3(config)#class-map type inspect matcg
+R3(config)#class-map type inspect match
+R3(config)#class-map type inspect match-all
+R3(config)#class-map type inspect match-all ?
+  WORD  class-map name
+R3(config)#class-map type inspect match-all IN-NET-CLASS-MAP
+R3(config-cmap)#mat
+R3(config-cmap)#match ac
+R3(config-cmap)#match access-group 101
+R3(config-cmap)#exit
+R3(config)#
+R3(config)#po
+R3(config)#pol
+R3(config)#policy-map ty
+R3(config)#policy-map type in
+R3(config)#?
+Configure commands:
+  aaa                Authentication, Authorization and Accounting.
+  access-list        Add an access list entry
+  banner             Define a login banner
+  bba-group          Configure BBA Group
+  boot               Modify system boot parameters
+  cdp                Global CDP configuration subcommands
+  class-map          Configure Class Map
+  clock              Configure time-of-day clock
+  config-register    Define the configuration register
+  crypto             Encryption module
+  default            Set a command to its defaults
+  do                 To run exec commands in config mode
+  dot11              IEEE 802.11 config commands
+  enable             Modify enable password parameters
+  end                Exit from configure mode
+  exit               Exit from configure mode
+  flow               Global Flow configuration subcommands
+  hostname           Set system's network name
+  interface          Select an interface to configure
+  ip                 Global IP configuration subcommands
+  ipv6               Global IPv6 configuration commands
+  key                Key management
+  license            Configure license features
+  line               Configure a terminal line
+  lldp               Global LLDP configuration subcommands
+  logging            Modify message logging facilities
+  login              Enable secure login checking
+  mac-address-table  Configure the MAC address table
+  no                 Negate a command or set its defaults
+  ntp                Configure NTP
+  parameter-map      parameter map
+  parser             Configure parser
+  policy-map         Configure QoS Policy Map
+  port-channel       EtherChannel configuration
+  priority-list      Build a priority list
+  privilege          Command privilege parameters
+  queue-list         Build a custom queue list
+  router             Enable a routing process
+  secure             Secure image and configuration archival commands
+  security           Infra Security CLIs
+  service            Modify use of network based services
+  snmp-server        Modify SNMP engine parameters
+  spanning-tree      Spanning Tree Subsystem
+  tacacs-server      Modify TACACS query parameters
+  username           Establish User Name Authentication
+  vpdn               Virtual Private Dialup Network
+  vpdn-group         VPDN group configuration
+  zone               FW with zoning
+  zone-pair          Zone pair command
+R3(config)#pol
+R3(config)#policy-map t
+R3(config)#policy-map type n
+R3(config)#policy-map type in
+R3(config)#policy-map type inspect IN-2-OUT-PMAP
+R3(config-pmap)#CL
+R3(config-pmap)#CLass t
+R3(config-pmap)#CLass type in
+R3(config-pmap)#CLass type inspect IN-NET-CLASS-MAP
+R3(config-pmap-c)#IN
+R3(config-pmap-c)#INspect 
+%No specific protocol configured in class IN-NET-CLASS-MAP for inspection. All protocols will be inspected
+R3(config-pmap-c)#ex
+R3(config-pmap-c)#exit 
+R3(config-pmap)#ex
+R3(config)#zone-pair security IN-2-OUT-ZPAIR source IN-ZONE destination OUT-ZONE
+R3(config-sec-zone-pair)#
+R3(config-sec-zone-pair)#
+R3(config-sec-zone-pair)#
+R3(config-sec-zone-pair)#ex
+R3(config)#ser
+R3(config)#service-po
+R3(config)#service-pol
+R3(config)#ex
+R3#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R3#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R3(config)#zone-pair security IN-2-OUT-ZPAIR source IN-ZONE destination OUT-ZONE
+R3(config-sec-zone-pair)#ser
+R3(config-sec-zone-pair)#service-policy ty
+R3(config-sec-zone-pair)#service-policy type in
+R3(config-sec-zone-pair)#service-policy type inspect IN-2-OUT-PMAP
+R3(config-sec-zone-pair)#EXIT
+R3(config)#
+R3(config)#in
+R3(config)#interface g
+R3(config)#interface gigabitEthernet 0/1
+R3(config-if)#zo
+R3(config-if)#zone-member se
+R3(config-if)#zone-member security IN-ZONE
+R3(config-if)#EX
+R3(config)#in
+R3(config)#interface s
+R3(config)#interface serial 0/0/1
+R3(config-if)#zo
+R3(config-if)#zone-member OUT-ZONE
+                          ^
+% Invalid input detected at '^' marker.
+	
+R3(config-if)#zone-member security OUT-ZONE
+R3(config-if)#exi
+R3(config)#
+R3(config)#
+R3(config)#
+R3(config)#do wr
+Building configuration...
+[OK]
+R3(config)#
+R3(config)#
+R3(config)#ex
+R3#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R3#wr
+Building configuration...
+[OK]
+R3#
+R3#
+R3#

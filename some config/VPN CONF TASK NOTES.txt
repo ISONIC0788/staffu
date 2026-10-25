@@ -1,0 +1,99 @@
+HQ ROUTER CONFIGURATION
+-----------------------
+
+TO CONFIGURE HOSTNAME AND INTERFACES
+
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#h
+Router(config)#hostname HQ
+HQ(config)#in
+HQ(config)#interface f
+HQ(config)#interface fastEthernet 0/0
+HQ(config-if)#ip address 10.1.1.1 255.0.0.0
+HQ(config-if)#no shutdown 
+
+
+HQ(config-if)#ex
+HQ(config)#interface s
+HQ(config)#interface serial 0/0/0
+HQ(config-if)#ip address 50.1.1.2 255.0.0.0
+HQ(config-if)#no shutdown 
+
+
+HQ(config)#ip route 0.0.0.0 0.0.0.0 50.1.1.1
+HQ(config)#crypto isakmp policy 12
+HQ(config-isakmp)#authentication pre-share 
+HQ(config-isakmp)#encryption 3des
+HQ(config-isakmp)#hash md5 
+HQ(config-isakmp)#group 1
+HQ(config-isakmp)#lifetime 3600
+HQ(config-isakmp)#exit
+HQ(config)#crypto isakmp key jojo123 address 60.1.1.2
+HQ(config)#crypto ipsec transform-set jojo esp-3des esp-md5-hmac 
+
+HQ(config)#access-list 120 permit ip 10.0.0.0 0.255.255.255 11.0.0.0 0.255.255.255
+HQ(config)#crypto map jojo 12 ipsec-isakmp 
+% NOTE: This new crypto map will remain disabled until a peer
+        and a valid access list have been configured.
+HQ(config-crypto-map)#set peer 60.1.1.2
+HQ(config-crypto-map)#set transform-set jojo
+HQ(config-crypto-map)#match address 120
+HQ(config-crypto-map)#exit
+HQ(config)#interface SErial 0/0/0
+HQ(config-if)#crypto map jojo
+*Jan  3 07:16:26.785: %CRYPTO-6-ISAKMP_ON_OFF: ISAKMP is ON
+
+
+
+
+ON BRANCH ROUTER
+
+
+Router(config)#hostname Branch
+Branch(config)#interface serial 0/0/0
+Branch(config-if)#ip address 60.1.1.2 255.0.0.0
+Branch(config-if)#no shutdown 
+
+Branch(config-if)#
+%LINK-5-CHANGED: Interface Serial0/0/0, changed state to up
+
+Branch(config-if)#ex
+Branch(config)#interface fastEthernet 0/0
+Branch(config-if)#ip address 11.1.1.1 255.0.0.0
+Branch(config-if)#no shutdown 
+
+
+
+Branch(config)#ip route 0.0.0.0 0.0.0.0 60.1.1.1
+Branch(config)#do wr
+
+
+
+
+
+
+
+Branch(config)#crypto isakmp policy 12
+Branch(config-isakmp)#authentication pre-share 
+Branch(config-isakmp)#encryption 3des 
+Branch(config-isakmp)#hash md5 
+Branch(config-isakmp)#group 1
+Branch(config-isakmp)#lifetime 3600
+Branch(config-isakmp)#exit
+Branch(config)#crypto isakmp key jojo123 address 50.1.1.2
+Branch(config)#crypto ipsec transform-set jojo esp-3des esp-md5-hmac 
+Branch(config)#access-list 120 permit ip 11.0.0.0 0.255.255.255 10.0.0.0 0.255.255.255
+Branch(config)#crypto map jojo 12 ipsec-isakmp 
+Branch(config-crypto-map)#set peer 50.1.1.2
+Branch(config-crypto-map)#set transform-set jojo
+Branch(config-crypto-map)#match address 120
+Branch(config-crypto-map)#exit
+Branch(config)#in
+Branch(config)#interface serial 0/0/0
+Branch(config-if)#crypto map jojo
+*Jan  3 07:16:26.785: %CRYPTO-6-ISAKMP_ON_OFF: ISAKMP is ON
+Branch(config-if)#ex
+Branch(config)#do wr
+Building configuration...
+[OK]
+Branch(config)#
