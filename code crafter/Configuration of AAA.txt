@@ -1,0 +1,46 @@
+Configuration of AAA
+
+Enable secret password: ciscoenpa55
+
+Step 1: Configure a local username on R1.
+Configure a username of admin with a secret password of admin123.
+R1(config)# username admin secret admin123
+
+Step 3: Configure local AAA authentication for console access on R1.
+R1(config)# aaa new-model
+R1(config)# aaa authentication login default local
+
+Step 4: Configure the line console to use the defined AAA authentication method.
+R1(config)# line console 0
+R1(config-line)# login authentication default
+
+Configure Local AAA Authentication for vty Lines on R1
+R1(config)#ip domain-name edy.com
+R1(config)#crypto key generate rsa 
+How many bits in the modulus [512]: 1024
+R1(config)#aaa authentication login ssh-login local
+R1(config)#line vty 0 4
+R1(config-line)#login authentication ssh-login
+R1(config-line)#transport input ssh 
+
+ssh -l admin 192.168.1.1
+Part 3: Configure Server-Based AAA Authentication Using TACACS+ on R2
+
+R2(config)#username admin1 secret admin123 
+R2(config)#tacacs-server host 192.168.2.2
+R2(config)#tacacs-server key admin123
+R2(config)#aaa authentication login default group tacacs+ local 
+R2(config-line)#login authentication default 
+
+
+configuration of telnet 
+Router(config)# enable secret cisco123
+Router(config)# line vty 0 4
+Router(config-line)# password mytelnetpassword
+Router(config-line)# login
+Router(config-line)# transport input telnet
+Router(config-line)# exit
+
+test connection telnet 192.168.1.1
+
+

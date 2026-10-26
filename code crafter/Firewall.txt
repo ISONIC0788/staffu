@@ -1,0 +1,121 @@
+fire wall configuration 
+
+1. Firewall Configuration (Cisco ASA 5505)
+enable
+configure terminal
+
+! Remove default DHCP pool
+no dhcpd address 192.168.1.5-192.168.1.36 inside
+
+! Configure Inside VLAN (VLAN 1)
+interface vlan 1
+ ip address 10.1.1.1 255.0.0.0
+ nameif inside
+ security-level 100
+ no shutdown
+exit
+
+! Assign Ethernet 0/0 to Inside VLAN
+interface ethernet 0/0
+ switchport access vlan 1
+ no shutdown
+exit
+
+! Configure Outside VLAN (VLAN 2)
+interface vlan 2
+ ip address 50.1.1.2 255.0.0.0
+ nameif outside
+ security-level 0
+ no shutdown
+exit
+
+! Assign Ethernet 0/1 to Outside VLAN
+interface ethernet 0/1
+ switchport access vlan 2
+ no shutdown
+exit
+
+! Configure DHCP Server for Inside LAN
+dhcpd address 10.1.1.10-10.1.1.30 inside
+dhcpd dns 8.8.8.8 interface inside
+dhcpd enable inside
+
+! Configure Default Route to Router0
+route outside 0.0.0.0 0.0.0.0 50.1.1.1
+
+! Configure Dynamic NAT (PAT) for Inside Network
+object network LAN
+ subnet 10.0.0.0 255.0.0.0
+ nat (inside,outside) dynamic interface
+exit
+
+! Configure Access Control List (ACL) for Outside Inbound Traffic
+access-list ofi extended permit tcp any any
+access-list ofi extended permit icmp any any
+access-group ofi in interface outside
+
+! Save Configuration
+write memory
+
+
+
+2. Router Side Configuration (Router0)
+enable
+configure terminal
+
+! Configure Interface connected to ASA Firewall
+interface FastEthernet0/0
+ ip address 50.1.1.1 255.0.0.0
+ no shutdown
+exit
+
+! Configure Interface connected to Server0
+interface FastEthernet0/1
+ ip address 8.8.8.1 255.0.0.0
+ no shutdown
+exit
+
+! Configure OSPF Routing
+router ospf 1
+ network 50.0.0.0 0.255.255.255 area 0
+ network 8.0.0.0 0.255.255.255 area 0
+exit
+
+! Save Configuration
+do write memory
+
+
+
+3. SSH & ACL Configuration
+enable
+configure terminal
+
+! Configure Hostname, Domain, and SSH User
+hostname R1
+ip domain-name lab.local
+username admin secret Admin@123
+
+! Generate 1024-bit RSA Keys and Enable SSHv2
+crypto key generate rsa
+1024
+ip ssh version 2
+
+! Secure VTY Lines for SSH Only
+line vty 0 4
+ login local
+ transport input ssh
+exit
+
+! Configure ACL 101 to Restrict SSH Access to Host 192.168.1.10
+access-list 101 permit tcp host 192.168.1.10 any eq 22
+access-list 101 deny tcp any any eq 22
+access-list 101 permit ip any any
+
+! Apply ACL to Interface
+interface GigabitEthernet0/0
+ ip access-group 101 in
+exit
+
+! Save Configuration
+end
+write memory
